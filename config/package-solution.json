@@ -1,0 +1,11 @@
+{
+  "$schema": "https://dev.office.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "react-crud-spfx-client-side-solution",
+    "id": "3ec977e5-b934-4b65-bd1d-8b1ba333ab12",
+    "version": "1.0.0.0"
+  },
+  "paths": {
+    "zippedPackage": "solution/react-crud-spfx.sppkg"
+  }
+}
