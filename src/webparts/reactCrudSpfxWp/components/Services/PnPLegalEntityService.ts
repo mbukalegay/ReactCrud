@@ -1,6 +1,8 @@
 import { LegalEntity } from '../Models/LegalEntity';
 import { ILegalEntityService } from './ILegalEntityService';
 
+import { LEGALENTITIES_LISTNAME } from '../../Constants';
+
 import { SPHttpClient } from '@microsoft/sp-http';
 import { IWebPartContext } from '@microsoft/sp-webpart-base';
 import HttpClient from '@microsoft/sp-http/lib/httpClient/HttpClient';
@@ -12,14 +14,10 @@ import {Constants} from '../Models/Constants';
 import $pnp from 'sp-pnp-js';
 import * as $ from 'jquery';
 
-export class LegalEntityService implements ILegalEntityService{
+export class PnPLegalEntityService implements ILegalEntityService{
     private legalEntities : LegalEntity[];
-    private httpClient: SPHttpClient;
-    private webAbsoluteUrl: string;
 
-    public constructor(webPartContext : IWebPartContext){
-        this.httpClient = webPartContext.spHttpClient;
-        this.webAbsoluteUrl =  webPartContext.pageContext.web.absoluteUrl;
+    public constructor(){
         this.legalEntities = new Array();  
         
         this.getEntities = this.getEntities.bind(this);
@@ -31,13 +29,17 @@ export class LegalEntityService implements ILegalEntityService{
      public getEntities() : Promise<LegalEntity[]>{
 
         this.legalEntities = [];
-    
-        return $pnp.sp.web.lists.getByTitle("LegalEntities").items.select("Id","Title",).get().then((response) => 
+    $pnp.sp.site.getContextInfo();
+        return $pnp.sp.web.lists.getByTitle(LEGALENTITIES_LISTNAME).items.select("Id","Title","Description").get().then((response) => 
             {
-                response.data.forEach(element => {
+                console.log(response);
+                response.forEach(element => {
+                    
                     this.legalEntities.push(new LegalEntity(element.Id, element.Title, element.Description));
                 });
                 return this.legalEntities;
+            },(error : Error) =>{
+                console.log(error);
             }
         
         );        
@@ -47,7 +49,7 @@ export class LegalEntityService implements ILegalEntityService{
     //https://github.com/ScotHillier/Workshop2017/blob/master/WebParts/CrudSheet/src/webparts/crudSheet/components/ContactsService.ts
     public addEntity(entity:LegalEntity) : Promise<LegalEntity[]>{
         this.legalEntities = [];
-        return $pnp.sp.web.lists.getByTitle("LegalEntities").items.getById(entity.Id).delete().then((response) =>{
+        return $pnp.sp.web.lists.getByTitle(LEGALENTITIES_LISTNAME).items.getById(entity.Id).delete().then((response) =>{
             console.log(response);
             return this.getEntities();
             }
@@ -55,7 +57,7 @@ export class LegalEntityService implements ILegalEntityService{
     }
 
     public deleteEntity(entity:LegalEntity) : Promise<LegalEntity[]> {
-       return $pnp.sp.web.lists.getByTitle("LegalEntities").items.getById(entity.Id).delete().then((response) =>{
+       return $pnp.sp.web.lists.getByTitle(LEGALENTITIES_LISTNAME).items.getById(entity.Id).delete().then((response) =>{
             console.log(response);
             return this.getEntities();
             }
@@ -64,7 +66,7 @@ export class LegalEntityService implements ILegalEntityService{
     }
 
     public updateEntity(entity:LegalEntity) : Promise<LegalEntity[]> {
-        return $pnp.sp.web.lists.getByTitle("LegalEntities").items.getById(entity.Id).update({
+        return $pnp.sp.web.lists.getByTitle(LEGALENTITIES_LISTNAME).items.getById(entity.Id).update({
             Title : entity.Title,
             Description : entity.Description
         }).then((response) =>{

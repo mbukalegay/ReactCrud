@@ -14,6 +14,7 @@ export class LegalEntityService implements ILegalEntityService{
     private webAbsoluteUrl: string;
 
     public constructor(webPartContext : IWebPartContext){
+        console.log("constructing");
         this.httpClient = webPartContext.spHttpClient;
         this.webAbsoluteUrl =  webPartContext.pageContext.web.absoluteUrl;
         this.legalEntities = new Array();    
@@ -22,30 +23,34 @@ export class LegalEntityService implements ILegalEntityService{
         this.addEntity= this.addEntity.bind(this);
         this.updateEntity= this.updateEntity.bind(this);
         this.deleteEntity= this.deleteEntity.bind(this);
+        console.log("finished constructing");
     }
 
      public getEntities() : Promise<LegalEntity[]>{
-        let url = this.webAbsoluteUrl + "_/api/Lists/getByTitle('LegalEntities')/items?select=Id,Title,Description";
+        let url = this.webAbsoluteUrl + "/_api/Lists/getByTitle('LegalEntities')/items?select=Id,Title,Description";
         this.legalEntities = [];
         
         return this.httpClient.get(url,SPHttpClient.configurations.v1).then( (response : SPHttpClientResponse) =>
             {
-                return response.json().then((data) => {
+                console.log("Got response for "+url);
+                  return response.json().then((data) => {
                         data.value.forEach(l => {
                             this.legalEntities.push(new LegalEntity(l.Id,l.Title,l.Description));
                         });
                         return this.legalEntities;
-                    }
-                    
+                    }                    
                 );
 
+            }, (error : Error) =>{
+                console.log(error.message);
+                console.log(error);
             }
         );
     }
 
     //https://github.com/ScotHillier/Workshop2017/blob/master/WebParts/CrudSheet/src/webparts/crudSheet/components/ContactsService.ts
     public addEntity(entity:LegalEntity) : Promise<LegalEntity[]>{
-        let url = this.webAbsoluteUrl + "_/api/Lists/getByTitle('LegalEntities')/items";
+        let url = this.webAbsoluteUrl + "/_api/Lists/getByTitle('LegalEntities')/items";
         this.legalEntities = [];
         const httpClientOptions : ISPHttpClientOptions = {
             body : JSON.stringify({

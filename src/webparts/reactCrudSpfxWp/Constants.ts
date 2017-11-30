@@ -1,0 +1,1 @@
+export const LEGALENTITIES_LISTNAME = "LegalEntities" 
